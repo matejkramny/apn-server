@@ -1,0 +1,8 @@
+extends layout
+
+block content
+	h1= title
+	p Send a push notification
+	form(action="/register",method="POST")
+		input(type="text",name="token")
+		input(type="submit",value="SEND")

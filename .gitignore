@@ -1,0 +1,6 @@
+.DS_STORE
+*/.DS_STORE
+*.pem
+*.key
+db.url
+node_modules
