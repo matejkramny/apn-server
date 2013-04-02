@@ -59,7 +59,6 @@ exports.schedule = function(req,res) {
 			
 			var date = new Date(time*1000);
 			console.log("Creating new notf. Delivery at "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds());
-			apn.notfs.push(notf);
 		} else {
 			// Nil device id
 			res.send("400 Invalid Token");

@@ -3,6 +3,12 @@ extends layout
 block content
 	h1= title
 	p Send a push notification
-	form(action="/register",method="POST")
-		input(type="text",name="token")
+	form(action="/schedule",method="POST")
+		input(type="text",name="token",value="a82e7a9c01897e501b44f1bd79b7c69a50776573f302524bae3a4bb1f1ea9a15")
+		input(type="text",name="deliveryTime",id="deliveryTime")
+		input(type="text",name="title",value="My title")
 		input(type="submit",value="SEND")
+	
+	script
+		var elem = document.getElementById("deliveryTime");
+		elem.value = Math.floor(Date.now()/1000) +30;

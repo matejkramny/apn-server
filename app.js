@@ -44,24 +44,7 @@ require('fs').readFile(__dirname+"/db.url", 'utf8', function (err, data) {
 	
 	mongoose.connect(data);
 	
-	models.Notification.find({ delivered: false }, function(err,notifications) {
-		if (err) throw err;
-	
-		if (notifications != null) {
-			console.log("I haz %d notifications to process", notifications.length);
-			var date = timeSeconds();
-			for (var i in notifications) {
-				var notification = notifications[i];
-			
-				var deliveryDate = new Date(notification.deliveryTime*1000);
-				console.log("Notif. named %s, delivery at %d:%d:%d", notification.title, deliveryDate.getHours(), deliveryDate.getMinutes(), deliveryDate.getSeconds());
-			
-				apn.notfs.push(notification);
-			}
-		} else {
-			console.log("No unsent notf.");
-		}
-	});
+	apn.pullNotifications();
 
 	http.createServer(app).listen(app.get('port'), function(){
 	  console.log("Express server listening on port " + app.get('port'));

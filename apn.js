@@ -47,55 +47,71 @@ exports.send = function (note) {
 	apnsConnection.sendNotification (note);
 }
 
-exports.notfs = [];
 
-var handleNotifications = function() {
-	var date = app.timeSeconds();
-	var finished = [];
+var pushNotification = function(notf) {
+	var notfDate = new Date(notf.deliveryTime * 1000);
+	var nowDate = new Date(Date.now());
+	console.log("Delivered %s was due %d:%d:%d now %d:%d:%d", notf.title, notfDate.getHours(), notfDate.getMinutes(), notfDate.getSeconds(), nowDate.getHours(), nowDate.getMinutes(), nowDate.getSeconds());
 	
-	for (var i in exports.notfs) {
-		var notf = exports.notfs[i];
+	// get device
+	models.Device.findOne({ _id: notf.deviceID }, function(err, device) {
+		if (err) throw err;
+		if (device == null) {
+			console.log ("Device null");
+			return;
+		}
 		
-		if (!notf.delivered && date > notf.deliveryTime) {
-			console.log("Pushing a notification");
-			// get device
-			models.Device.findOne({ _id: notf.deviceID }, function(err, device) {
-				if (err) throw err;
-				if (device == null) {
-					console.log ("Device null");
-					return;
-				}
-				
-				// Due
-				var note = new apns.Notification();
-				
-				note.expiry = timeSeconds() + 3600; // Expires 1 hour from now.
-				note.badge = 1;
-				note.sound = "ping.aiff";
-				note.alert = notf.title;
-				note.payload = {'hello': 'world'};
-				note.device = new apns.Device(device.token);
-				
-				exports.send(note);
-				
-				notf.delivered = true;
-				notf.save(function(err) {
+		// Due
+		var note = new apns.Notification();
+	
+		note.expiry = timeSeconds() + 3600; // Expires 1 hour from now.
+		note.badge = 1;
+		note.sound = "ping.aiff";
+		note.alert = notf.title;
+		note.payload = {'hello': 'world'};
+		note.device = new apns.Device(device.token);
+	
+		exports.send(note);
+	});
+};
+
+var pullNotifications = function() {
+	var start = Date.now();
+	var end = start+30000;
+	models.Notification.find({ delivered: false }, function(err,notifications) {
+		if (err) throw err;
+		
+		for (var i = 0; i < notifications.length; i++) {
+			var notification = notifications[i];
+			
+			var deliveryTime = notification.deliveryTime * 1000;
+			if (start > deliveryTime || deliveryTime < end) {
+				notification.delivered = true;
+				notification.save(function(err) {
 					if (err) throw err;
-					var notfDate = new Date(notf.deliveryTime * 1000);
-					var nowDate = new Date(Date.now());
-					console.log("Delivered %s was due %d:%d:%d now %d:%d:%d", notf.title, notfDate.getHours(), notfDate.getMinutes(), notfDate.getSeconds(), nowDate.getHours(), nowDate.getMinutes(), nowDate.getSeconds());
 				});
-			});
+				
+				var diff = Date.now() - deliveryTime;
+				if (diff <= 0) {
+					pushNotification(notification);
+				} else {
+					// Because of async issues, the object needs to be cloned. Otherwise the title wouldn't be the same when the timeout occurs and the notification is sent off.
+					// Future do this with Futuresjs-sequence.
+					var notf = {
+						title: notification.title,
+						deliveryTime: notification.deliveryTime,
+						delivered: true,
+						deviceID: notification.deviceID
+					};
+					setTimeout(function() {
+						pushNotification(notf);
+					}, diff);
+				}
+			}
 		}
-		
-		if (notf.delivered) {
-			finished.push(i);
-		}
-	}
-	
-	for (var i in finished) {
-		exports.notfs.splice(i,1);
-	}
+	});
 }
+exports.pullNotifications = pullNotifications;
 
-var interval = setInterval(handleNotifications, 1000); // 1 sec
+//var interval = setInterval(handleNotifications, 10000); // 10 sec tick
+var pullInterval = setInterval(pullNotifications, 30000);
