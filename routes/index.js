@@ -1,6 +1,7 @@
 var models = require('../models');
 var app = require('../app')
 var apn = require('../apn')
+var config = require('../config');
 
 exports.index = function(req, res){
   res.render('index', { title: 'Express' });
@@ -49,12 +50,13 @@ exports.schedule = function(req,res) {
 				title: title,
 				deliveryTime: time,
 				delivered: false,
-				deviceID: device._id
+				deviceID: device._id,
+				sandbox: config.sandbox
 			});
 			
 			notf.save(function(err) {
 				if (err) throw err;
-				console.log("Saved new notification");
+				console.log("Saved new notification %s", config.sandbox ? "is sandboxed" : "in production");
 			});
 			
 			var date = new Date(time*1000);

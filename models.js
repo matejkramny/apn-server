@@ -11,7 +11,8 @@ var notification = Schema({
 	title: String,
 	deliveryTime: Number,
 	delivered: Boolean,
-	deviceID: ObjectId
+	deviceID: ObjectId,
+	sandbox: { default: false, type: Boolean }
 });
 
 exports.Device = mongoose.model('Device', device);

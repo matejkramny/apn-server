@@ -11,7 +11,8 @@ var express = require('express')
   , apns = require('apn')
   , mongoose = require('mongoose')
   , models = require('./models')
-  , cli = require('./cli');
+  , cli = require('./cli')
+  , config = require('./config');
 
 timeSeconds = function() { return Math.floor(Date.now() / 1000); };
 exports.timeSeconds = timeSeconds;
@@ -38,7 +39,7 @@ app.get('/', routes.index);
 app.post('/register', routes.register);
 app.post('/schedule', routes.schedule);
 
-require('fs').readFile(__dirname+"/db.url", 'utf8', function (err, data) {
+require('fs').readFile(config.dbKey, 'utf8', function (err, data) {
 	if (err) throw err;
 	data = data.replace("\n", "");
 	

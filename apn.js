@@ -2,16 +2,17 @@ var apns = require('apn');
 var app = require('./app');
 var models = require('./models');
 var apnsConnection;
+var config = require('./config');
 
-require('fs').readFile(__dirname+'/certificate.key', 'utf8', function(err, key) {
+require('fs').readFile(config.certKey, 'utf8', function(err, key) {
 	if (err) throw err;
 	key = key.replace('\n', '');
 	
 	var options = {
-	    cert: 'cert.pem',
-	    key:  'key.pem',
+	    cert: config.cert,
+	    key: config.key,
 	    passphrase: key,
-	    gateway: 'gateway.sandbox.push.apple.com',
+	    gateway: config.gateway,
 	    port: 2195,
 	    rejectUnauthorized: true,
 	    enhanced: true,
@@ -22,6 +23,9 @@ require('fs').readFile(__dirname+'/certificate.key', 'utf8', function(err, key) 
 	    autoAdjustCache: true,
 	    connectionTimeout: 0
 	};
+	
+	console.log (" I am using %s with %s", config.cert, config.gateway);
+	
 	apnsConnection = new apns.Connection(options);
 
 	apnsConnection.on('error', function(err) {
@@ -40,13 +44,12 @@ require('fs').readFile(__dirname+'/certificate.key', 'utf8', function(err, key) 
 	apnsConnection.on('transmissionError', function() {
 		console.log("transmission error")
 	});
-})
+});
 
 
 exports.send = function (note) {
 	apnsConnection.sendNotification (note);
 }
-
 
 var pushNotification = function(notf) {
 	var notfDate = new Date(notf.deliveryTime * 1000);
@@ -78,7 +81,7 @@ var pushNotification = function(notf) {
 var pullNotifications = function() {
 	var start = Date.now();
 	var end = start+30000;
-	models.Notification.find({ delivered: false }, function(err,notifications) {
+	models.Notification.find({ delivered: false, sandbox: config.sandbox }, function(err,notifications) {
 		if (err) throw err;
 		
 		for (var i = 0; i < notifications.length; i++) {
@@ -91,8 +94,14 @@ var pullNotifications = function() {
 					if (err) throw err;
 				});
 				
-				var diff = Date.now() - deliveryTime;
+				var diff = deliveryTime - Date.now();
+				
+				console.log("%d", Date.now() / 1000);
+				console.log("%d", deliveryTime / 1000);
+				console.log("Diff: "+diff / 1000);
+				
 				if (diff <= 0) {
+					console.log("Pushing now");
 					pushNotification(notification);
 				} else {
 					// Because of async issues, the object needs to be cloned. Otherwise the title wouldn't be the same when the timeout occurs and the notification is sent off.
@@ -103,6 +112,7 @@ var pullNotifications = function() {
 						delivered: true,
 						deviceID: notification.deviceID
 					};
+					console.log("Pushing in %d", diff)
 					setTimeout(function() {
 						pushNotification(notf);
 					}, diff);
@@ -110,7 +120,7 @@ var pullNotifications = function() {
 			}
 		}
 	});
-}
+};
 exports.pullNotifications = pullNotifications;
 
 //var interval = setInterval(handleNotifications, 10000); // 10 sec tick

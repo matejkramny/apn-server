@@ -1,9 +1,12 @@
 {
-  "name": "application-name",
-  "version": "0.0.1",
-  "private": true,
+  "name": "NodeAPN",
+  "subdomain": "apn.matejkramny",
+  "version": "0.0.3",
   "scripts": {
-    "start": "node app"
+    "start": "app.js"
+  },
+  "engines": {
+    "node": "0.8.x"
   },
   "dependencies": {
     "express": "3.0.6",
@@ -12,6 +15,9 @@
     "mongoose": "*",
     "commander": "*",
     "progress": "*",
-	"sequence": "*"
-  }
+    "sequence": "*"
+  },
+  "domains": [
+    "apn.matej.me"
+  ]
 }
