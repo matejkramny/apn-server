@@ -3,9 +3,6 @@ var app = require('../app')
 var apn = require('../apn')
 var config = require('../config');
 
-exports.index = function(req, res){
-  res.render('index', { title: 'Express' });
-};
 exports.register = function(req,res) {
 	console.log("Requesting");
 	var token = req.body.token;
@@ -37,11 +34,11 @@ exports.register = function(req,res) {
 	});
 };
 exports.schedule = function(req,res) {
-	console.log("Scheduling");
 	var token = req.body.token;
 	var time = req.body.deliveryTime;
 	var title = req.body.title;
 	
+	console.log("Scheduling %s", title);
 	models.Device.findOne({ token: token }, function (err, device) {
 		if (err) throw err;
 		if (device != null) {
