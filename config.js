@@ -10,8 +10,8 @@ if (config.sandbox == false) {
 	config.key = __dirname+"/prodKey.pem";
 	config.gateway = "gateway.push.apple.com";
 } else {
-	config.cert = __dirname+"/devCert.pem";
-	config.key = __dirname+"/devKey.pem";
+	config.cert = __dirname+"/prodCert.pem";
+	config.key = __dirname+"/prodKey.pem";
 	config.gateway = "gateway.sandbox.push.apple.com";
 }
 
