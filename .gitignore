@@ -1,2 +1,4 @@
 .DS_STORE
 */.DS_STORE
+private
+node_modules
