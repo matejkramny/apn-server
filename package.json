@@ -15,7 +15,8 @@
     "mongoose": "*",
     "commander": "*",
     "progress": "*",
-    "sequence": "*"
+    "sequence": "*",
+	"async": "*"
   },
   "domains": [
     "apn.matej.me"

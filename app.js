@@ -1,8 +1,3 @@
-
-/**
- * Module dependencies.
- */
-
 var express = require('express')
   , routes = require('./routes')
   , http = require('http')
@@ -11,7 +6,6 @@ var express = require('express')
   , apns = require('apn')
   , mongoose = require('mongoose')
   , models = require('./models')
-  , cli = require('./cli')
   , config = require('./config');
 
 timeSeconds = function() { return Math.floor(Date.now() / 1000); };
@@ -35,18 +29,21 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
+app.get('/', function(req, res) {
+	res.send("ok");
+})
 app.post('/register', routes.register);
 app.post('/schedule', routes.schedule);
 
-require('fs').readFile(config.dbKey, 'utf8', function (err, data) {
-	if (err) throw err;
-	data = data.replace("\n", "");
-	
-	mongoose.connect(data);
-	
-	apn.pullNotifications();
+if (config.production) {
+	mongoose.connect("mongodb://apn:Neer6dooj5IuChailair0ohPei8ke0uchohshohV@127.0.0.1/apn");
+} else {
+	mongoose.connect("mongodb://localhost/apn");
+}
 
-	http.createServer(app).listen(app.get('port'), function(){
-	  console.log("Express server listening on port " + app.get('port'));
-	});
+apn.pullNotifications();
+require('./feedback')
+
+http.createServer(app).listen(app.get('port'), function(){
+  console.log("Express server listening on port " + app.get('port'));
 });
