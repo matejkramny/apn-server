@@ -36,7 +36,7 @@ app.post('/register', routes.register);
 app.post('/schedule', routes.schedule);
 
 if (config.production) {
-	mongoose.connect("mongodb://apn:Neer6dooj5IuChailair0ohPei8ke0uchohshohV@127.0.0.1/apn");
+	mongoose.connect(module.exports.DB_URL);
 } else {
 	mongoose.connect("mongodb://localhost/apn");
 }

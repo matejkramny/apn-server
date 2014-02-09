@@ -9,7 +9,6 @@ var handleFeedback = function(devices) {
 	}, function(err, sortedDevices) {
 		if (err) throw err;
 		
-		console.log(sortedDevices);
 		models.Device.update({
 			token: {
 				$in: sortedDevices
@@ -25,7 +24,7 @@ var handleFeedback = function(devices) {
 }
 
 var lite = new apn.Feedback({
-    cert: config.lite.prod.cert,
+	cert: config.lite.prod.cert,
 	key: config.lite.prod.key,
 	passphrase: 'trav',
 	address: 'feedback.push.apple.com',
